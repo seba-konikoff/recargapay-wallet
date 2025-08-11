@@ -1,13 +1,13 @@
-package ar.com.sebakoni.recargapay.walllets;
+package ar.com.sebakoni.recargapay.wallet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WallletsApplication {
+public class RecargapayWalletApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WallletsApplication.class, args);
+		SpringApplication.run(RecargapayWalletApplication.class, args);
 	}
 
 }
