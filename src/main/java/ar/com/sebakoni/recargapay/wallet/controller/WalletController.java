@@ -1,5 +1,6 @@
 package ar.com.sebakoni.recargapay.wallet.controller;
 
+import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
 import ar.com.sebakoni.recargapay.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,7 @@ public class WalletController {
     private WalletService walletService;
 
     @GetMapping("/wallets/{id}/balance")
-    public BigDecimal getBalance(@PathVariable String id) {
+    public BigDecimal getBalance(@PathVariable String id) throws WalletNotFoundException {
         return this.walletService.getBalance(id);
     }
 }

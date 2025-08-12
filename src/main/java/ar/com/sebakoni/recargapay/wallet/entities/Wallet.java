@@ -11,4 +11,9 @@ public class Wallet {
     @Id
     public String id;
     public BigDecimal balance;
+
+    public Wallet(String id, BigDecimal balance) {
+        this.id = id;
+        this.balance = balance;
+    }
 }
