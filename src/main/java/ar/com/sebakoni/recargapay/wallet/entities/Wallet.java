@@ -2,8 +2,11 @@ package ar.com.sebakoni.recargapay.wallet.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "wallets")
@@ -14,10 +17,14 @@ public class Wallet {
     public String userId;
     public BigDecimal balance;
 
+    @OneToMany(mappedBy = "id")
+    public List<WalletTransaction> walletTransactions;
+
     public Wallet(String id, String userId, BigDecimal balance) {
         this.id = id;
         this.userId = userId;
         this.balance = balance;
+        this.walletTransactions = new ArrayList<>();
     }
 
     @Override

@@ -16,18 +16,20 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class WalletServiceImplTest {
 
-    public static final BigDecimal EXPECTED_BALANCE = BigDecimal.TEN;
+    public static final BigDecimal EXPECTED_BALANCE = BigDecimal.ONE;
+    public static final BigDecimal NEW_AMOUNT = BigDecimal.ONE;
+    public static final BigDecimal NEW_BALANCE = BigDecimal.TWO;
+
     public static final String A_WALLET_ID = "a-wallet-id";
     public static final String A_USER_ID = "a-user-id";
 
     @Mock
     private WalletRepository walletRepository;
-
     @Mock
     private UUIDGenerator uuidGenerator;
 
@@ -64,6 +66,24 @@ public class WalletServiceImplTest {
 
         assertThrows(UserHasWalletException.class, () -> {
             walletService.createWallet(A_USER_ID);
+        });
+    }
+
+    @Test
+    void depositIntoWalletOk() throws WalletNotFoundException {
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(new Wallet(A_WALLET_ID, A_USER_ID, EXPECTED_BALANCE)));
+
+        BigDecimal newAmount = walletService.deposit(A_WALLET_ID, NEW_AMOUNT);
+
+        assertEquals(NEW_BALANCE, newAmount);
+        verify(this.walletRepository, times(1)).save(any(Wallet.class));
+    }
+
+    @Test
+    void depositIntoUnexistentWalletError() {
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.empty());
+        assertThrows(WalletNotFoundException.class, () -> {
+            walletService.deposit(A_WALLET_ID, NEW_AMOUNT);
         });
     }
 }
