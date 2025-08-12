@@ -1,6 +1,7 @@
 package ar.com.sebakoni.recargapay.wallet.service;
 
 import ar.com.sebakoni.recargapay.wallet.entities.Wallet;
+import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletRepository;
 import ar.com.sebakoni.recargapay.wallet.utils.UUIDGenerator;
@@ -50,10 +51,19 @@ public class WalletServiceImplTest {
     }
 
     @Test
-    void createWalletOk() {
+    void createWalletOk() throws UserHasWalletException {
         when(uuidGenerator.generate()).thenReturn(A_WALLET_ID);
         Wallet actual = walletService.createWallet(A_USER_ID);
 
         assertEquals(new Wallet(A_WALLET_ID, A_USER_ID, BigDecimal.ZERO), actual);
+    }
+
+    @Test
+    void createWalletWhenUserHasWalletError() {
+        when(walletRepository.findByUserId(A_USER_ID)).thenReturn(Optional.of(new Wallet(A_WALLET_ID, A_USER_ID, EXPECTED_BALANCE)));
+
+        assertThrows(UserHasWalletException.class, () -> {
+            walletService.createWallet(A_USER_ID);
+        });
     }
 }

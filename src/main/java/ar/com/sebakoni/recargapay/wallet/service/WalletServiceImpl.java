@@ -1,6 +1,7 @@
 package ar.com.sebakoni.recargapay.wallet.service;
 
 import ar.com.sebakoni.recargapay.wallet.entities.Wallet;
+import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletRepository;
 import ar.com.sebakoni.recargapay.wallet.utils.UUIDGenerator;
@@ -32,7 +33,11 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public Wallet createWallet(String userId) {
+    public Wallet createWallet(String userId) throws UserHasWalletException {
+        if (walletRepository.findByUserId(userId).isPresent()) {
+            throw new UserHasWalletException(userId);
+        }
+
         Wallet newWallet = new Wallet(uuidGenerator.generate(), userId, BigDecimal.ZERO);
         walletRepository.save(newWallet);
         return newWallet;
