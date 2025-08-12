@@ -4,16 +4,31 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Entity(name = "wallets")
 public class Wallet {
 
     @Id
     public String id;
+    public String userId;
     public BigDecimal balance;
 
-    public Wallet(String id, BigDecimal balance) {
+    public Wallet(String id, String userId, BigDecimal balance) {
         this.id = id;
+        this.userId = userId;
         this.balance = balance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Wallet wallet = (Wallet) o;
+        return Objects.equals(id, wallet.id) && Objects.equals(userId, wallet.userId) && Objects.equals(balance, wallet.balance);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userId, balance);
     }
 }
