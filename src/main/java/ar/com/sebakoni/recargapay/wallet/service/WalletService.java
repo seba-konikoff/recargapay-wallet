@@ -12,4 +12,5 @@ public interface WalletService {
     Wallet createWallet(String userId) throws UserHasWalletException;
     BigDecimal deposit(String walletId, BigDecimal amount) throws WalletNotFoundException;
     BigDecimal withdraw(String walletId, BigDecimal amount) throws WalletNotFoundException, WalletWithoutSufficientFundsException;
+    void transfer(String originWalletId, String destinationWalletId, BigDecimal amount) throws WalletNotFoundException, WalletWithoutSufficientFundsException;
 }

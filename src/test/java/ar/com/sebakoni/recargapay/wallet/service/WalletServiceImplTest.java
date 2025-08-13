@@ -1,6 +1,7 @@
 package ar.com.sebakoni.recargapay.wallet.service;
 
 import ar.com.sebakoni.recargapay.wallet.entities.Wallet;
+import ar.com.sebakoni.recargapay.wallet.entities.WalletTransaction;
 import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletWithoutSufficientFundsException;
@@ -21,13 +22,11 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class WalletServiceImplTest {
-
-    public static final BigDecimal EXPECTED_BALANCE = BigDecimal.ONE;
-    public static final BigDecimal NEW_AMOUNT = BigDecimal.ONE;
-    public static final BigDecimal NEW_BALANCE = BigDecimal.TWO;
-
     public static final String A_WALLET_ID = "a-wallet-id";
+    public static final String ANOTHER_WALLET_ID = "another-wallet-id";
+
     public static final String A_USER_ID = "a-user-id";
+    public static final String ANOTHER_USER_ID = "another-user-id";
 
     @Mock
     private WalletRepository walletRepository;
@@ -42,9 +41,9 @@ public class WalletServiceImplTest {
         Wallet returnedWallet = new Wallet();
         returnedWallet.id = A_WALLET_ID;
         returnedWallet.userId = A_USER_ID;
-        returnedWallet.balance = EXPECTED_BALANCE;
+        returnedWallet.balance = BigDecimal.ONE;
         when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(returnedWallet));
-        assertEquals(EXPECTED_BALANCE, walletService.getBalance(A_WALLET_ID));
+        assertEquals(BigDecimal.ONE, walletService.getBalance(A_WALLET_ID));
     }
 
     @Test
@@ -74,7 +73,7 @@ public class WalletServiceImplTest {
         Wallet returnedWallet = new Wallet();
         returnedWallet.id = A_WALLET_ID;
         returnedWallet.userId = A_USER_ID;
-        returnedWallet.balance = EXPECTED_BALANCE;
+        returnedWallet.balance = BigDecimal.ONE;
         when(walletRepository.findByUserId(A_USER_ID)).thenReturn(Optional.of(returnedWallet));
 
         assertThrows(UserHasWalletException.class, () -> {
@@ -87,20 +86,22 @@ public class WalletServiceImplTest {
         Wallet returnedWallet = new Wallet();
         returnedWallet.id = A_WALLET_ID;
         returnedWallet.userId = A_USER_ID;
-        returnedWallet.balance = EXPECTED_BALANCE;
+        returnedWallet.balance = BigDecimal.ZERO;
         when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(returnedWallet));
 
-        BigDecimal newAmount = walletService.deposit(A_WALLET_ID, NEW_AMOUNT);
+        BigDecimal newAmount = walletService.deposit(A_WALLET_ID, BigDecimal.ONE);
 
-        assertEquals(NEW_BALANCE, newAmount);
-        verify(this.walletRepository, times(1)).save(any(Wallet.class));
+        assertEquals(BigDecimal.ONE, newAmount);
+        returnedWallet.balance = BigDecimal.ONE;
+        verify(this.walletRepository, times(1)).save(returnedWallet);
+        verify(this.walletTransactionRepository, times(1)).save(any(WalletTransaction.class));
     }
 
     @Test
     void depositIntoUnexistentWalletError() {
         when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.empty());
         assertThrows(WalletNotFoundException.class, () -> {
-            walletService.deposit(A_WALLET_ID, NEW_AMOUNT);
+            walletService.deposit(A_WALLET_ID, BigDecimal.ONE);
         });
     }
 
@@ -115,14 +116,16 @@ public class WalletServiceImplTest {
         BigDecimal newAmount = walletService.withdraw(A_WALLET_ID, BigDecimal.ONE);
 
         assertEquals(BigDecimal.ZERO, newAmount);
-        verify(this.walletRepository, times(1)).save(any(Wallet.class));
+        returnedWallet.balance = BigDecimal.ZERO;
+        verify(this.walletRepository, times(1)).save(returnedWallet);
+        verify(this.walletTransactionRepository, times(1)).save(any(WalletTransaction.class));
     }
 
     @Test
     void withdrawFromUnexistentWalletError() {
         when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.empty());
         assertThrows(WalletNotFoundException.class, () -> {
-            walletService.withdraw(A_WALLET_ID, NEW_AMOUNT);
+            walletService.withdraw(A_WALLET_ID, BigDecimal.ONE);
         });
     }
 
@@ -137,5 +140,30 @@ public class WalletServiceImplTest {
         assertThrows(WalletWithoutSufficientFundsException.class, () -> {
             walletService.withdraw(A_WALLET_ID, BigDecimal.ONE);
         });
+    }
+
+    @Test
+    void transferBetweenAccountsOk() throws WalletNotFoundException, WalletWithoutSufficientFundsException {
+        Wallet originWallet = new Wallet();
+        originWallet.id = A_WALLET_ID;
+        originWallet.userId = A_USER_ID;
+        originWallet.balance = BigDecimal.ONE;
+
+        Wallet destiationWallet = new Wallet();
+        destiationWallet.id = ANOTHER_WALLET_ID;
+        destiationWallet.userId = ANOTHER_USER_ID;
+        destiationWallet.balance = BigDecimal.ZERO;
+
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(originWallet));
+        when(walletRepository.findById(ANOTHER_WALLET_ID)).thenReturn(Optional.of(destiationWallet));
+
+        walletService.transfer(A_WALLET_ID, ANOTHER_WALLET_ID, BigDecimal.ONE);
+
+        originWallet.balance = BigDecimal.ZERO;
+        destiationWallet.balance = BigDecimal.ONE;
+
+        verify(this.walletRepository, times(1)).save(originWallet);
+        verify(this.walletRepository, times(1)).save(destiationWallet);
+        verify(this.walletTransactionRepository, times(2)).save(any(WalletTransaction.class));
     }
 }

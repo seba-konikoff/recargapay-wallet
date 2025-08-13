@@ -9,8 +9,10 @@ import ar.com.sebakoni.recargapay.wallet.repository.WalletRepository;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.Optional;
 
 @Service
@@ -45,6 +47,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional(rollbackFor = { SQLException.class })
     public BigDecimal deposit(String walletId, BigDecimal amount) throws WalletNotFoundException {
         Optional<Wallet> optWallet = this.walletRepository.findById(walletId);
 
@@ -70,6 +73,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional(rollbackFor = { SQLException.class })
     public BigDecimal withdraw(String walletId, BigDecimal amount) throws WalletNotFoundException, WalletWithoutSufficientFundsException {
         Optional<Wallet> optWallet = this.walletRepository.findById(walletId);
 
@@ -96,5 +100,12 @@ public class WalletServiceImpl implements WalletService {
         this.walletRepository.save(wallet);
 
         return newBalance;
+    }
+
+    @Override
+    @Transactional(rollbackFor = { SQLException.class })
+    public void transfer(String originWalletId, String destinationWalletId, BigDecimal amount) throws WalletNotFoundException, WalletWithoutSufficientFundsException {
+        this.withdraw(originWalletId, amount);
+        this.deposit(destinationWalletId, amount);
     }
 }

@@ -26,6 +26,6 @@ public class WalletTransaction {
     public Date createdAt;
 
     public enum Type {
-        DEPOSIT, WITHDRAWAL, TRANSFER
+        DEPOSIT, WITHDRAWAL
     }
 }

@@ -5,6 +5,7 @@ import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletWithoutSufficientFundsException;
 import ar.com.sebakoni.recargapay.wallet.model.Deposit;
+import ar.com.sebakoni.recargapay.wallet.model.Transfer;
 import ar.com.sebakoni.recargapay.wallet.model.WalletCreation;
 import ar.com.sebakoni.recargapay.wallet.model.Withdrawal;
 import ar.com.sebakoni.recargapay.wallet.service.WalletService;
@@ -37,5 +38,10 @@ public class WalletController {
     @PostMapping("/wallet/withdraw")
     public BigDecimal withdrawal(@RequestBody Withdrawal withdrawal) throws WalletNotFoundException, WalletWithoutSufficientFundsException {
         return this.walletService.withdraw(withdrawal.walletId(), withdrawal.amount());
+    }
+
+    @PostMapping("/wallet/transfer")
+    public void transfer(@RequestBody Transfer transfer) throws WalletNotFoundException, WalletWithoutSufficientFundsException {
+        this.walletService.transfer(transfer.originWalletId(), transfer.destinationWalletId(), transfer.amount());
     }
 }
