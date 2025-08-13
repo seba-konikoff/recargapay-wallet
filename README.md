@@ -12,7 +12,9 @@ Download the repo and run the `build.sh` script, it will set up the container wi
 
 ## Testing
 
-Run the script `test.sh` to run all tests
+To run the suite of unit tests, run the script `test.sh` to run all tests.
+
+To verify the functioning of the application, a Postman collection was provided at the root of the project.
 
 ## Design choices
 
@@ -24,17 +26,23 @@ The service was designed as stateless, with all pertinent data stored in the dat
 
 ### Application
 
+The design assumes that the only responsibility of the application is the management of Wallets. Users, owners of a wallet, were not modeled and only referenced by their ID.
+
 The application code has few moving parts, as long as the connection between the service and database remains stable there should be no downtime assuming normal traffic. 
 
 To ensure data consistency, all methods that executed multiple changes to the database were marked as transactional, ensuring all changes would be applied, or rollbacked in case of failure.
 
 In order to speed up development and testing, it was decided not to implement OOP patterns for the Wallet, adopting a more procedural approach. This allowed all relevant logic to cohabit, allowing for simpler testing and ease of reading. 
 
+For the balance endpoints, it was decided to use simple `GET` endpoints and provide the parameters of the endpoint in the URL, to avoid unnecessary POST calls.
+
 ### Tradeoffs
 
 For time, a full transaction trace was not implemented, with the wallet transaction being sufficient for a first version. A transfer log would be the next thing to implement, detailing origin and destination wallets.
 
 Error handling remains basic, all known business failure cases are mapped to exception and have a proper message informing the user of what happened, but should be mapped to a proper response in order to avoid exposing sensitive information.
+
+The historical balance logic could be refactored to remove the reversing of the list.
 
 ## Time analysis
 
