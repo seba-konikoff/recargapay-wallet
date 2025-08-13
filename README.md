@@ -2,13 +2,17 @@
 Wallet management service for RecargaPay
 
 ## Dependencies
-* Java 24
-* Podman
-* Podman-Compose
+* [Java 24](https://jdk.java.net/24/)
+* [Podman](https://podman.io/)
+* [Docker-Compose](https://docs.docker.com/compose/install/)
 
-## Installation instructions
+## Build instructions
 
-Download the repo and run the `build.sh` script, it will set up the container with the service and database. End the process with ctrl+c to terminate the application
+To build the application, run the script `build.sh`. This will create the image with the application ready to start
+
+## Run instruction
+
+To start the application, run the command `podman-compose up`. This will create the containers for the application and the PostgreSQL database, configured to be accessed from localhost
 
 ## Testing
 
@@ -24,6 +28,8 @@ Podman was chosen for its ease of use and variety of platforms supported.
 
 The service was designed as stateless, with all pertinent data stored in the database, to ensure an easy transition to a kubernetes-based cloud solution should a pod-based deployment be required to meet demand.
 
+PostgreSQL was chosen for data storage because it is open source and a reliable industry standard. The queries, while simple, would be better served with a relational database.
+
 ### Application
 
 The design assumes that the only responsibility of the application is the management of Wallets. Users, owners of a wallet, were not modeled and only referenced by their ID.
@@ -38,11 +44,13 @@ For the balance endpoints, it was decided to use simple `GET` endpoints and prov
 
 ### Tradeoffs
 
-For time, a full transaction trace was not implemented, with the wallet transaction being sufficient for a first version. A transfer log would be the next thing to implement, detailing origin and destination wallets.
+Due to time constraints, a full transaction trace was not implemented, with the wallet transaction being sufficient for a first version. A transfer log would be the next thing to implement, detailing origin and destination wallets.
 
 Error handling remains basic, all known business failure cases are mapped to exception and have a proper message informing the user of what happened, but should be mapped to a proper response in order to avoid exposing sensitive information.
 
 The historical balance logic could be refactored to remove the reversing of the list.
+
+To prevent concurrent balance modifications, a distributed lock system using Spring's integrated tools should be added to the application, using the JDBC version to lean on the existing database.
 
 ## Time analysis
 
