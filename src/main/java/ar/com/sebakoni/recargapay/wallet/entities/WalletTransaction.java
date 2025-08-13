@@ -1,7 +1,7 @@
 package ar.com.sebakoni.recargapay.wallet.entities;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -21,6 +21,6 @@ public class WalletTransaction {
     public BigDecimal newBalance;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @CreatedDate
+    @CreationTimestamp
     public Date createdAt;
 }
