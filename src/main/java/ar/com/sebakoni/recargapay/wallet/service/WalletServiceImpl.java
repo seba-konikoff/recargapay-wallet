@@ -59,6 +59,7 @@ public class WalletServiceImpl implements WalletService {
         transaction.wallet = wallet;
         transaction.amount = amount;
         transaction.newBalance = newBalance;
+        transaction.type = WalletTransaction.Type.DEPOSIT;
         wallet.balance = newBalance;
         wallet.walletTransactions.add(transaction);
 
@@ -87,6 +88,7 @@ public class WalletServiceImpl implements WalletService {
         transaction.wallet = wallet;
         transaction.amount = amount;
         transaction.newBalance = newBalance;
+        transaction.type = WalletTransaction.Type.WITHDRAWAL;
         wallet.balance = newBalance;
         wallet.walletTransactions.add(transaction);
 

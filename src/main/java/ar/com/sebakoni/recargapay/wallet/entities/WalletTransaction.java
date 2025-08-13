@@ -19,8 +19,13 @@ public class WalletTransaction {
 
     public BigDecimal amount;
     public BigDecimal newBalance;
+    public Type type;
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
     public Date createdAt;
+
+    public enum Type {
+        DEPOSIT, WITHDRAWAL, TRANSFER
+    }
 }
