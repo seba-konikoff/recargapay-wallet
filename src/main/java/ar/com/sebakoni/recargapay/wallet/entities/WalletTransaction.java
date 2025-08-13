@@ -10,6 +10,7 @@ import java.util.Date;
 public class WalletTransaction {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     public String id;
 
     @ManyToOne
@@ -18,6 +19,7 @@ public class WalletTransaction {
 
     public BigDecimal amount;
     public BigDecimal newBalance;
+
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     public Date createdAt;

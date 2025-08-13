@@ -1,11 +1,13 @@
 package ar.com.sebakoni.recargapay.wallet.controller;
 
+import ar.com.sebakoni.recargapay.wallet.entities.Wallet;
+import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
+import ar.com.sebakoni.recargapay.wallet.model.Deposit;
+import ar.com.sebakoni.recargapay.wallet.model.WalletCreation;
 import ar.com.sebakoni.recargapay.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
@@ -18,5 +20,15 @@ public class WalletController {
     @GetMapping("/wallets/{id}/balance")
     public BigDecimal getBalance(@PathVariable String id) throws WalletNotFoundException {
         return this.walletService.getBalance(id);
+    }
+
+    @PostMapping("/wallet")
+    public Wallet createWallet(@RequestBody WalletCreation walletCreation) throws UserHasWalletException {
+        return this.walletService.createWallet(walletCreation.userId());
+    }
+
+    @PostMapping("/wallet/deposit")
+    public BigDecimal deposit(@RequestBody Deposit deposit) throws WalletNotFoundException {
+        return this.walletService.deposit(deposit.walletId(), deposit.amount());
     }
 }

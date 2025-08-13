@@ -1,8 +1,6 @@
 package ar.com.sebakoni.recargapay.wallet.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,19 +11,13 @@ import java.util.Objects;
 public class Wallet {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     public String id;
     public String userId;
-    public BigDecimal balance;
+    public BigDecimal balance = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "id")
-    public List<WalletTransaction> walletTransactions;
-
-    public Wallet(String id, String userId, BigDecimal balance) {
-        this.id = id;
-        this.userId = userId;
-        this.balance = balance;
-        this.walletTransactions = new ArrayList<>();
-    }
+    public List<WalletTransaction> walletTransactions = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

@@ -4,7 +4,7 @@ import ar.com.sebakoni.recargapay.wallet.entities.Wallet;
 import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletRepository;
-import ar.com.sebakoni.recargapay.wallet.utils.UUIDGenerator;
+import ar.com.sebakoni.recargapay.wallet.repository.WalletTransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,14 +31,18 @@ public class WalletServiceImplTest {
     @Mock
     private WalletRepository walletRepository;
     @Mock
-    private UUIDGenerator uuidGenerator;
+    private WalletTransactionRepository walletTransactionRepository;
 
     @InjectMocks
     private WalletServiceImpl walletService;
 
     @Test
     void getCurrentBalanceOk() throws WalletNotFoundException {
-        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(new Wallet(A_WALLET_ID, A_USER_ID, EXPECTED_BALANCE)));
+        Wallet returnedWallet = new Wallet();
+        returnedWallet.id = A_WALLET_ID;
+        returnedWallet.userId = A_USER_ID;
+        returnedWallet.balance = EXPECTED_BALANCE;
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(returnedWallet));
         assertEquals(EXPECTED_BALANCE, walletService.getBalance(A_WALLET_ID));
     }
 
@@ -54,15 +58,23 @@ public class WalletServiceImplTest {
 
     @Test
     void createWalletOk() throws UserHasWalletException {
-        when(uuidGenerator.generate()).thenReturn(A_WALLET_ID);
+        Wallet expectedWallet = new Wallet();
+        expectedWallet.id = A_WALLET_ID;
+        expectedWallet.userId = A_USER_ID;
+        when(walletRepository.save(any(Wallet.class))).thenReturn(expectedWallet);
+
         Wallet actual = walletService.createWallet(A_USER_ID);
 
-        assertEquals(new Wallet(A_WALLET_ID, A_USER_ID, BigDecimal.ZERO), actual);
+        assertEquals(expectedWallet, actual);
     }
 
     @Test
     void createWalletWhenUserHasWalletError() {
-        when(walletRepository.findByUserId(A_USER_ID)).thenReturn(Optional.of(new Wallet(A_WALLET_ID, A_USER_ID, EXPECTED_BALANCE)));
+        Wallet returnedWallet = new Wallet();
+        returnedWallet.id = A_WALLET_ID;
+        returnedWallet.userId = A_USER_ID;
+        returnedWallet.balance = EXPECTED_BALANCE;
+        when(walletRepository.findByUserId(A_USER_ID)).thenReturn(Optional.of(returnedWallet));
 
         assertThrows(UserHasWalletException.class, () -> {
             walletService.createWallet(A_USER_ID);
@@ -71,7 +83,11 @@ public class WalletServiceImplTest {
 
     @Test
     void depositIntoWalletOk() throws WalletNotFoundException {
-        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(new Wallet(A_WALLET_ID, A_USER_ID, EXPECTED_BALANCE)));
+        Wallet returnedWallet = new Wallet();
+        returnedWallet.id = A_WALLET_ID;
+        returnedWallet.userId = A_USER_ID;
+        returnedWallet.balance = EXPECTED_BALANCE;
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(returnedWallet));
 
         BigDecimal newAmount = walletService.deposit(A_WALLET_ID, NEW_AMOUNT);
 
