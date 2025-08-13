@@ -1,0 +1,198 @@
+{
+	"info": {
+		"_postman_id": "489bf296-835c-4e5d-8e3c-ba0d715b1ecd",
+		"name": "RecargaPay Wallet",
+		"description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47506401",
+		"_collection_link": "https://seba-koni-5867667.postman.co/workspace/Sebastian-Konikoff's-Workspace~81c08c60-f65d-4d63-8a85-98349b2c073a/collection/47506401-489bf296-835c-4e5d-8e3c-ba0d715b1ecd?action=share&source=collection_link&creator=47506401"
+	},
+	"item": [
+		{
+			"name": "create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"a-user-id\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/wallet",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "balance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/wallet/:walletId/balance",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallet",
+						":walletId",
+						"balance"
+					],
+					"variable": [
+						{
+							"key": "walletId",
+							"value": "e4e8643e-1fb2-4abc-a772-d680e79c8fd4",
+							"description": "ID of the wallet to search"
+						}
+					]
+				},
+				"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+			},
+			"response": []
+		},
+		{
+			"name": "deposit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"walletId\": \"e4e8643e-1fb2-4abc-a772-d680e79c8fd4\",\n    \"amount\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/wallet/deposit",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallet",
+						"deposit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "withdraw",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"walletId\": \"e4e8643e-1fb2-4abc-a772-d680e79c8fd4\",\n    \"amount\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/wallet/withdraw",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallet",
+						"withdraw"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "transfer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"originWalletId\": \"e4e8643e-1fb2-4abc-a772-d680e79c8fd4\",\n    \"destinationWalletId\": \"7e7b8de6-dadb-483a-8759-adb9c7a5f853\",\n    \"amount\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/wallet/transfer",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallet",
+						"transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "balance at",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/wallet/:walletId/balance/:date",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallet",
+						":walletId",
+						"balance",
+						":date"
+					],
+					"variable": [
+						{
+							"key": "walletId",
+							"value": "e4e8643e-1fb2-4abc-a772-d680e79c8fd4",
+							"description": "ID of the wallet to search"
+						},
+						{
+							"key": "date",
+							"value": "2025-08-13_19:38:15",
+							"description": "Date and time at which to get balance. Format is yyyy-MM-dd_HH:mm:ss"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
