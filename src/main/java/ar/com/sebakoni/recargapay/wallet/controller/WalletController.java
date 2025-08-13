@@ -10,9 +10,11 @@ import ar.com.sebakoni.recargapay.wallet.model.WalletCreation;
 import ar.com.sebakoni.recargapay.wallet.model.Withdrawal;
 import ar.com.sebakoni.recargapay.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @RestController()
 public class WalletController {
@@ -20,9 +22,9 @@ public class WalletController {
     @Autowired
     private WalletService walletService;
 
-    @GetMapping("/wallets/{id}/balance")
-    public BigDecimal getBalance(@PathVariable String id) throws WalletNotFoundException {
-        return this.walletService.getBalance(id);
+    @GetMapping("/wallet/{walletId}/balance")
+    public BigDecimal getBalance(@PathVariable String walletId) throws WalletNotFoundException {
+        return this.walletService.getBalance(walletId);
     }
 
     @PostMapping("/wallet")
@@ -43,5 +45,10 @@ public class WalletController {
     @PostMapping("/wallet/transfer")
     public void transfer(@RequestBody Transfer transfer) throws WalletNotFoundException, WalletWithoutSufficientFundsException {
         this.walletService.transfer(transfer.originWalletId(), transfer.destinationWalletId(), transfer.amount());
+    }
+
+    @GetMapping("/wallet/{walletId}/balance/{date}")
+    public BigDecimal getBalanceAt(@PathVariable String walletId, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd_HH:mm:ss") Date date) throws WalletNotFoundException {
+        return this.walletService.getBalanceAt(walletId, date);
     }
 }

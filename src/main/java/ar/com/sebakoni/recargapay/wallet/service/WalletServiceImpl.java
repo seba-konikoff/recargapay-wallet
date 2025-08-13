@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -107,5 +108,27 @@ public class WalletServiceImpl implements WalletService {
     public void transfer(String originWalletId, String destinationWalletId, BigDecimal amount) throws WalletNotFoundException, WalletWithoutSufficientFundsException {
         this.withdraw(originWalletId, amount);
         this.deposit(destinationWalletId, amount);
+    }
+
+    @Override
+    public BigDecimal getBalanceAt(String walletId, Date targetDate) throws WalletNotFoundException {
+        Optional<Wallet> optWallet = this.walletRepository.findById(walletId);
+
+        if (optWallet.isEmpty()) {
+            throw new WalletNotFoundException(walletId);
+        }
+
+        Wallet wallet = optWallet.get();
+
+        if (wallet.walletTransactions.isEmpty()) {
+            return BigDecimal.ZERO; // wallets are created with an empty balance
+        }
+
+        Optional<WalletTransaction> transaction = wallet.walletTransactions.reversed().stream().filter(t -> t.createdAt.before(targetDate)).findFirst();
+        if (transaction.isEmpty()) {
+            return BigDecimal.ZERO; // there are no transactions before the given date
+        }
+
+        return transaction.get().newBalance;
     }
 }

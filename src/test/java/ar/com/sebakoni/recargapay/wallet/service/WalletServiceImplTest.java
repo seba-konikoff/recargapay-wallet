@@ -7,6 +7,7 @@ import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletWithoutSufficientFundsException;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletRepository;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletTransactionRepository;
+import org.assertj.core.util.DateUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -165,5 +167,47 @@ public class WalletServiceImplTest {
         verify(this.walletRepository, times(1)).save(originWallet);
         verify(this.walletRepository, times(1)).save(destiationWallet);
         verify(this.walletTransactionRepository, times(2)).save(any(WalletTransaction.class));
+    }
+
+    @Test
+    void getBalanceAtOk() throws WalletNotFoundException {
+        Wallet wallet = new Wallet();
+        wallet.id = A_WALLET_ID;
+        wallet.userId = A_USER_ID;
+        wallet.balance = BigDecimal.TWO;
+
+        WalletTransaction t1 = new WalletTransaction();
+        t1.id = "transaction-id-1";
+        t1.type = WalletTransaction.Type.DEPOSIT;
+        t1.wallet = wallet;
+        t1.amount = BigDecimal.ONE;
+        t1.newBalance = BigDecimal.ONE;
+        t1.createdAt = DateUtil.yesterday();
+        wallet.walletTransactions.add(t1);
+
+        WalletTransaction t2 = new WalletTransaction();
+        t2.id = "transaction-id-1";
+        t2.type = WalletTransaction.Type.DEPOSIT;
+        t2.wallet = wallet;
+        t2.amount = BigDecimal.ONE;
+        t2.newBalance = BigDecimal.TWO;
+        t2.createdAt = DateUtil.tomorrow();
+        wallet.walletTransactions.add(t2);
+
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(wallet));
+
+        BigDecimal previousBalance = walletService.getBalanceAt(A_WALLET_ID, DateUtil.now());
+
+        assertEquals(BigDecimal.ONE, previousBalance);
+    }
+
+    @Test
+    void getBalanceAtNotFound() {
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.empty());
+        Exception thrown = assertThrows(Exception.class, () -> {
+            walletService.getBalanceAt(A_WALLET_ID, DateUtil.now());
+        });
+
+        assertEquals("Wallet with id a-wallet-id not found", thrown.getMessage());
     }
 }

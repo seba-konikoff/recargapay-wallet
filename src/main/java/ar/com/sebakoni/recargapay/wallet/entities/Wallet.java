@@ -16,7 +16,7 @@ public class Wallet {
     public String userId;
     public BigDecimal balance = BigDecimal.ZERO;
 
-    @OneToMany(mappedBy = "id")
+    @OneToMany(mappedBy = "wallet")
     public List<WalletTransaction> walletTransactions = new ArrayList<>();
 
     @Override
