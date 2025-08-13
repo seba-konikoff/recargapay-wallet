@@ -4,6 +4,7 @@ import ar.com.sebakoni.recargapay.wallet.entities.Wallet;
 import ar.com.sebakoni.recargapay.wallet.entities.WalletTransaction;
 import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
+import ar.com.sebakoni.recargapay.wallet.exception.WalletWithoutSufficientFundsException;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletRepository;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,34 @@ public class WalletServiceImpl implements WalletService {
 
         Wallet wallet = optWallet.get();
         BigDecimal newBalance = wallet.balance.add(amount);
+
+        WalletTransaction transaction = new WalletTransaction();
+        transaction.wallet = wallet;
+        transaction.amount = amount;
+        transaction.newBalance = newBalance;
+        wallet.balance = newBalance;
+        wallet.walletTransactions.add(transaction);
+
+        this.walletTransactionRepository.save(transaction);
+        this.walletRepository.save(wallet);
+
+        return newBalance;
+    }
+
+    @Override
+    public BigDecimal withdraw(String walletId, BigDecimal amount) throws WalletNotFoundException, WalletWithoutSufficientFundsException {
+        Optional<Wallet> optWallet = this.walletRepository.findById(walletId);
+
+        if (optWallet.isEmpty()) {
+            throw new WalletNotFoundException(walletId);
+        }
+
+        Wallet wallet = optWallet.get();
+        if (wallet.balance.compareTo(amount) < 0) {
+            throw new WalletWithoutSufficientFundsException(walletId);
+        }
+
+        BigDecimal newBalance = wallet.balance.subtract(amount);
 
         WalletTransaction transaction = new WalletTransaction();
         transaction.wallet = wallet;

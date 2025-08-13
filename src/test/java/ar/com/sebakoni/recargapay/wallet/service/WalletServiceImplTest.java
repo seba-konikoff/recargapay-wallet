@@ -3,6 +3,7 @@ package ar.com.sebakoni.recargapay.wallet.service;
 import ar.com.sebakoni.recargapay.wallet.entities.Wallet;
 import ar.com.sebakoni.recargapay.wallet.exception.UserHasWalletException;
 import ar.com.sebakoni.recargapay.wallet.exception.WalletNotFoundException;
+import ar.com.sebakoni.recargapay.wallet.exception.WalletWithoutSufficientFundsException;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletRepository;
 import ar.com.sebakoni.recargapay.wallet.repository.WalletTransactionRepository;
 import org.junit.jupiter.api.Test;
@@ -100,6 +101,41 @@ public class WalletServiceImplTest {
         when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.empty());
         assertThrows(WalletNotFoundException.class, () -> {
             walletService.deposit(A_WALLET_ID, NEW_AMOUNT);
+        });
+    }
+
+    @Test
+    void withdrawFromAccountOk() throws WalletNotFoundException, WalletWithoutSufficientFundsException {
+        Wallet returnedWallet = new Wallet();
+        returnedWallet.id = A_WALLET_ID;
+        returnedWallet.userId = A_USER_ID;
+        returnedWallet.balance = BigDecimal.ONE;
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(returnedWallet));
+
+        BigDecimal newAmount = walletService.withdraw(A_WALLET_ID, BigDecimal.ONE);
+
+        assertEquals(BigDecimal.ZERO, newAmount);
+        verify(this.walletRepository, times(1)).save(any(Wallet.class));
+    }
+
+    @Test
+    void withdrawFromUnexistentWalletError() {
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.empty());
+        assertThrows(WalletNotFoundException.class, () -> {
+            walletService.withdraw(A_WALLET_ID, NEW_AMOUNT);
+        });
+    }
+
+    @Test
+    void withdrawFromAccountWithoutFundsError() {
+        Wallet returnedWallet = new Wallet();
+        returnedWallet.id = A_WALLET_ID;
+        returnedWallet.userId = A_USER_ID;
+        returnedWallet.balance = BigDecimal.ZERO;
+        when(walletRepository.findById(A_WALLET_ID)).thenReturn(Optional.of(returnedWallet));
+
+        assertThrows(WalletWithoutSufficientFundsException.class, () -> {
+            walletService.withdraw(A_WALLET_ID, BigDecimal.ONE);
         });
     }
 }
